@@ -1,15 +1,21 @@
-int value = 0;
+// No Multitasking!
+
+
+int value = 0; 
 int stage = 1;
 
-int x;
+// Main character initial vars
+int x; 
 int y;
 int size;
 int speedRight = 0;
 int speedLeft = 0;
-int speedXMax = 10;
-int speedYMin = -10;
-int speedY = 0;
+int speedXMax = 10; 
+int speedYMin = -10; //Charatcer can control going up, so there's a min. But the chracter can't control going down, so there's no need for a max.
+int speedY = 0; //Gravitional force
+float flightPower = 100; //Jet pack fuel
 
+// 2nd character initial vars 
 int x2;
 int y2;
 int size2;
@@ -20,41 +26,58 @@ int speedYMin2 = -10;
 int speedY2 = 0;
 float flightPower2 = 100;
 
+//Feild Movement
 int ss = 1; //ss = screenSpeed
-int pcFake = 0; //pc = pixelCount
-int pcReal = 0; //pc = pixelCount
-int level = 1;
+int pcFake = 0; //pc = pixelCount, used to check when to change level
+int pcReal = 0; //pc = pixelCount, used to tell how many pixels the chracter travled
+
+//Game vars
+int level = 1; 
 int coin = 0;
-int sfill = 0; //sfill = storeFill
-int sfill2a = 230;
-int sfill2b = 100;
-int sfill2c = 255;
-int sfill3a = 230;
-int sfill3b = 100;
-int sfill3c = 255;
-int sfill4a = 230;
-int sfill4b = 100;
-int sfill4c = 255;
-int sfill5a = 230;
-int sfill5b = 100;
-int sfill5c = 255;
-int tf = 0; //tf = tutorial fill
-int coinUpgrade = 0;
-int flightPowerUpgrade=0;
-float flightPower = 100;
 boolean dead = false;
 boolean restart = false;
-boolean clickHelp = false;
+
+//Vars for shop
+boolean clickHelp = false; //limits mousePressed events to one time
+//sfill is to highlight the menu button as well as the chracters when hovered over.
+//a,b,c = r,g,b
+int sfill = 0; //sfill = storeFill, for menu button, base color
+
+int sfill2a = 230; //sfill2 is for speedboost
+int sfill2b = 100;
+int sfill2c = 255;
+
+int sfill3a = 230; //sfill3 is for more coin upgrade
+int sfill3b = 100;
+int sfill3c = 255;
+int coinUpgrade = 0; //counting amount of coin upgrades
+
+int sfill4a = 230; //sfill4 is for more flightpower
+int sfill4b = 100;
+int sfill4c = 255;
+int flightPowerUpgrade=0; //counting amount of flightpower upgrades
+
+int sfill5a = 230; //sfill5 is for a fireball sheild
+int sfill5b = 100;
+int sfill5c = 255;
 boolean fireballSheild = false;
+
+//tutorial vars
+int tf = 0; //tf = tutorial fill menu button color
+
+//boolean spikeSheild = false; in development
 boolean menuScreen = true;
 boolean th = false; //th = tutorial help
-String clicked;
+String clicked; //Passes the name of the button clicked to menuClicked function
+
+//Arrays for objects
 spike[] spikeArray = new spike[30]; 
 fireball[] fireballArray = new fireball[100]; 
 button[] buttonArray = new button[5];
 coin[] coinArray = new coin[30];
 poisonSpike[] poisonSpikeArray = new poisonSpike[10];
 cloud[] cloudArray = new cloud[10];
+goldenCloud[] goldenCloudArray = new goldenCloud[2];
 
 void setup() {
   fullScreen();
@@ -85,6 +108,8 @@ void setup() {
     buttonArray[2] = new button(width/2-210,height/2+100,340,75,width/2-115,"store");
     buttonArray[3] = new button(width/2-210,height/2,340,75,width/2-180,"multiplayer");
     buttonArray[4] = new button(width/2-210,height/2+200,340,75,width/2-140,"tutorial");
+    
+    //goldenCloudArray[1] = new goldenCloud(width/2,round(random(height/4,height/2)),50);
     
 }
 
@@ -623,11 +648,12 @@ void draw() {
      cloudArray[i].move();
   }
   
+  //goldenCloudArray[1].display();
+  //goldenCloudArray[1].move();
+  //goldenCloudArray[1].collision();
   
-  if(pcFake>=4200) {
-    pcFake=0;
-    level=level+1;
-  }
+  
+  levelCheck(pcFake); //Checks the level, updates level if passed 4200 pixels
   
   if(restart==true) {
     restart=false; 
@@ -820,6 +846,14 @@ void keyPressed() {
       fill(86,163,50);
       triangle(x,y,x+size*1.5,y-size*3,x+size*3,y);
     }
+    void collision(int cx,int cy) {
+      float dist = dist(cx,cy,x,y);
+      if(dist<=size+42) { //42 is the size of the player
+        dead = true;
+        coin = coin - coin/4;
+        fireballSheild = false;
+      }
+    }
   }
   
   
@@ -1004,32 +1038,69 @@ class coin {
 }
 
 class cloud {
-  int x;
-  int y;
+  int cx;
+  int cy;
   int size;
   int speed;
+  int random;
+  int times = 2;
   cloud() {
     
   }
-  cloud(int cx,int cy,int csize) {
-    x= round(random(cx-csize,cx+csize*2));
-    y= round(random(cy-csize*2,cy+csize));
+  cloud(int cloudx,int cloudy,int csize) {
+    cx= round(random(cloudx-csize,cloudx+csize*2));
+    cy= round(random(cloudy-csize*2,cloudy+csize));
     size=round(random(csize/2,csize*1.5));
     speed=round(random(0-40/size,40/size));
+    random=1;
   }
   void display() {
     for(int i=0;i<size/2; i++) {
       fill(255);
       stroke(255);
-      ellipse(x+i*(size/4),y,size,size);
+      ellipse(cx+i*(size/4),cy,size,size);
       stroke(0);
     }
   }
   void move() {
-    x=x-round(ss-random(speed/2,speed*1.5));
-    if(x<0-size*2) {
-      x=width;
+    cx=cx-round(ss-random(speed/2,speed*1.5));
+    if(cx<0-size*times) {
+      if(round(random(1,random))==1) {
+        cx=width;
+      }
     }
+    if(restart==true) {
+      cx=round(random(0,width)); 
+      cy= round(random(0,height/2));
+      speed=round(random(0-40/size,40/size));
+    }
+  }
+}
+
+class goldenCloud extends cloud {
+  
+  goldenCloud() {
+    
+  }
+  goldenCloud(int cx,int cy, int size) {
+    super(cx,cy,size);
+    random=100;
+    coinArray[1] = new coin(round(cx+size*5),cy-size-20,20);
+    coinArray[2] = new coin(round(cx+size*2.5),cy-size-20,20);
+    coinArray[3] = new coin(round(cx+size*1),cy-size-20,20);
+    times=5;
+    speed=0;
+  }
+  void collision() {    
+    if(x>cx-size/1.2 && x<cx+size*5 && y>cy-50 && y<cy) {
+      speedY=0;
+    }
+  }
+  void display() {
+    fill(239,239,91);
+    stroke(209,209,51);
+    rect(cx,cy,size*5,size,20);
+    stroke(0);
   }
 }
 
@@ -1059,4 +1130,11 @@ void restart() {
   x = width/2;
   y = height/2;
   size = 42;
+}
+
+void levelCheck(int pcF) {
+  if(pcF>=4200) { 
+    pcFake=0;
+    level=level+1;
+  }
 }
