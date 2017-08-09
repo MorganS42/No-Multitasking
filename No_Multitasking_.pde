@@ -1,8 +1,10 @@
 // No Multitasking!
 
+//import dff.minim.*;
+
+//Minim minim;
 
 int value = 0; 
-int stage = 1;
 
 // Main character initial vars
 int x; 
@@ -36,9 +38,12 @@ int level = 1;
 int coin = 0;
 boolean dead = false;
 boolean restart = false;
+boolean minimized = false;
+int widthHelp;
+int heightHelp;
+boolean clickHelp = false; //limits mousePressed events to one time
 
 //Vars for shop
-boolean clickHelp = false; //limits mousePressed events to one time
 //sfill is to highlight the menu button as well as the chracters when hovered over.
 //a,b,c = r,g,b
 int sfill = 0; //sfill = storeFill, for menu button, base color
@@ -62,8 +67,11 @@ int sfill5b = 100;
 int sfill5c = 255;
 boolean fireballSheild = false;
 
+
+
 //tutorial vars
 int tf = 0; //tf = tutorial fill menu button color
+int stage = 1; //The 
 
 //boolean spikeSheild = false; in development
 boolean menuScreen = true;
@@ -81,6 +89,9 @@ goldenCloud[] goldenCloudArray = new goldenCloud[2];
 
 void setup() {
   fullScreen();
+  widthHelp=width;
+  heightHelp=height;
+  surface.setResizable(true);
   background(255);
   x = width/2;
   y = height/2;
@@ -114,8 +125,10 @@ void setup() {
 }
 
 void draw() {
+
   
   background(255,0,255);
+  
   if(dead==true) {
     fill(0);
     textSize(32);
@@ -124,6 +137,8 @@ void draw() {
     int z = a.length();
     text("You travelled "+a+" pixels.", width/2-width/8-(z*16),height/1.05);
   }
+  
+  
   textSize(32);
   fill(0);
   text("No Multitasking!", width/2-width/8.7,height/2-height/2.5);
@@ -140,6 +155,7 @@ void draw() {
   
   
   if (clicked=="store") {
+      
       
       menuScreen=false;
       int dx = width/2-70; //dx = drawing x
@@ -398,8 +414,6 @@ void draw() {
   textSize(32);
   fill(0);
   text("No Multitasking!", width/2-width/8.7,height/2-height/2.5);
-  textSize(16);
-  text("Press escape/esc to quit the game.",10,10,90,100);
   textSize(24);
   text("Level:"+level,width-120,height/2-height/2.18);
   if(clicked=="play") {
@@ -581,9 +595,9 @@ void draw() {
         flightPower = flightPower -1;
       }
     
-      if(key==ESC) {
-        exit();
-      }
+      //if(key==ESC) {
+        //exit();
+      //}
     if(key==CODED) {
       if(keyCode==UP && speedY>speedYMin && flightPower>1) {
           speedY=speedY-2;
@@ -813,10 +827,13 @@ void keyPressed() {
     }
     public void move() {
       x = x-ss;   
-      if(x<0 || restart==true) {
-        if(round(random(1,4200/level)) == 1 || restart==true) {
+      if(x<0) {
+        if(round(random(1,4200/level)) == 1) {
           x=width;
         }
+      }
+      if(restart==true) {
+        x=0-size*10; 
       }
       if(clicked=="tutorial") {
         x=width/2+size*4;
@@ -824,8 +841,8 @@ void keyPressed() {
     }
     
     void collision(int cx,int cy) {
-      float dist = dist(cx,cy,x,y);
-      if(dist<=size+42) { //42 is the size of the player
+      float dist = dist(cx+42/2,cy+42/2,x,y);
+      if(dist<=size+42/2) { //42 is the size of the player
         dead = true;
       }
     }
@@ -847,8 +864,8 @@ void keyPressed() {
       triangle(x,y,x+size*1.5,y-size*3,x+size*3,y);
     }
     void collision(int cx,int cy) {
-      float dist = dist(cx,cy,x,y);
-      if(dist<=size+42) { //42 is the size of the player
+      float dist = dist(cx+42/2,cy+42/2,x,y);
+      if(dist<=size+42/2) { //42 is the size of the player
         dead = true;
         coin = coin - coin/4;
         fireballSheild = false;
@@ -1025,12 +1042,12 @@ class coin {
       y=round(random(height/2+height/3-50,50));
     }
     if(restart==true) {
-      x=0-size; 
+      x=0-size*10; 
     }
   }
-  void collision(int cx,int cy) {
-    float dist = dist(cx,cy,x,y);
-    if(dist<=size+42) { //42 is the size of the player
+  void collision(int playerX,int playerY) {
+    float dist = dist(playerX+42/2,playerY+42/2,x,y); //42 is the size of the player
+    if(dist<=size+42/2) { 
       coin=coin+1;
       x=0-size;
     }
@@ -1133,8 +1150,9 @@ void restart() {
 }
 
 void levelCheck(int pcF) {
-  if(pcF>=4200) { 
+  if(pcF>=1000) { 
     pcFake=0;
     level=level+1;
+    coin=coin+level;
   }
 }
