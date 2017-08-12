@@ -1,14 +1,16 @@
 // No Multitasking!
 
-//import dff.minim.*;
+//import ddf.minim.*;
 
 //Minim minim;
+
+//AudioPlayer player;
 
 int value = 0; 
 
 // Main character initial vars
-int x; 
-int y;
+float x; 
+float y;
 int size;
 int speedRight = 0;
 int speedLeft = 0;
@@ -18,8 +20,8 @@ int speedY = 0; //Gravitional force
 float flightPower = 100; //Jet pack fuel
 
 // 2nd character initial vars 
-int x2;
-int y2;
+float x2;
+float y2;
 int size2;
 int speedRight2 = 0;
 int speedLeft2 = 0;
@@ -29,44 +31,54 @@ int speedY2 = 0;
 float flightPower2 = 100;
 
 //Feild Movement
-int ss = 1; //ss = screenSpeed
-int pcFake = 0; //pc = pixelCount, used to check when to change level
-int pcReal = 0; //pc = pixelCount, used to tell how many pixels the chracter travled
+float ss = 1; //ss = screenSpeed
+float pcFake = 0; //pc = pixelCount, used to check when to change level
+float pcReal = 0; //pc = pixelCount, used to tell how many pixels the chracter travled
 
 //Game vars
 int level = 1; 
-int coin = 0;
+int coin = 100;
 boolean dead = false;
 boolean restart = false;
-boolean minimized = false;
-int widthHelp;
-int heightHelp;
 boolean clickHelp = false; //limits mousePressed events to one time
+int skinR=230; //red skin
+int skinG=100; //green skin
+int skinB=255; //blue skin
 
 //Vars for shop
 //sfill is to highlight the menu button as well as the chracters when hovered over.
 //a,b,c = r,g,b
 int sfill = 0; //sfill = storeFill, for menu button, base color
 
-int sfill2a = 230; //sfill2 is for speedboost
-int sfill2b = 100;
-int sfill2c = 255;
+int sfill2a = skinR; //sfill2 is for speedboost
+int sfill2b = skinG;
+int sfill2c = skinB;
 
-int sfill3a = 230; //sfill3 is for more coin upgrade
-int sfill3b = 100;
-int sfill3c = 255;
+int sfill3a = skinR; //sfill3 is for more coin upgrade
+int sfill3b = skinG;
+int sfill3c = skinB;
 int coinUpgrade = 0; //counting amount of coin upgrades
 
-int sfill4a = 230; //sfill4 is for more flightpower
-int sfill4b = 100;
-int sfill4c = 255;
+int sfill4a = skinR; //sfill4 is for more flightpower
+int sfill4b = skinG;
+int sfill4c = skinB;
 int flightPowerUpgrade=0; //counting amount of flightpower upgrades
 
-int sfill5a = 230; //sfill5 is for a fireball sheild
-int sfill5b = 100;
-int sfill5c = 255;
+int sfill5a = skinR; //sfill5 is for a fireball sheild
+int sfill5b = skinG;
+int sfill5c = skinB;
 boolean fireballSheild = false;
 
+int sfill6 = 0; //sfill6 is for the skins button
+
+boolean skins=false; //skin button
+
+int skinRFake=skinR; //red skin, it's fake because it won't be saved unless payed for.
+int skinGFake=skinG; //green skin, it's fake because it won't be saved unless payed for.
+int skinBFake=skinB; //blue skin, it's fake because it won't be saved unless payed for.
+
+int sfill7 = 0; //for the back button in the skins screen
+int sfill8 = 0; //for the buy button for the skin
 
 
 //tutorial vars
@@ -89,9 +101,6 @@ goldenCloud[] goldenCloudArray = new goldenCloud[2];
 
 void setup() {
   fullScreen();
-  widthHelp=width;
-  heightHelp=height;
-  surface.setResizable(true);
   background(255);
   x = width/2;
   y = height/2;
@@ -120,12 +129,14 @@ void setup() {
     buttonArray[3] = new button(width/2-210,height/2,340,75,width/2-180,"multiplayer");
     buttonArray[4] = new button(width/2-210,height/2+200,340,75,width/2-140,"tutorial");
     
-    //goldenCloudArray[1] = new goldenCloud(width/2,round(random(height/4,height/2)),50);
+    //,goldenCloudArray[1] = new goldenCloud(width/2,round(random(height/4,height/2)),50);
     
+    //minim = new Minim(this);
+    
+    //player = minim.loadFile("Hall of the Mountain King.mp3"); //the song
 }
 
 void draw() {
-
   
   background(255,0,255);
   
@@ -144,19 +155,127 @@ void draw() {
   text("No Multitasking!", width/2-width/8.7,height/2-height/2.5);
   
 
-    buttonArray[1].display();
-    buttonArray[1].clicked();
-    buttonArray[2].display();
-    buttonArray[2].clicked();
-    buttonArray[3].display();
-    buttonArray[3].clicked();
-    buttonArray[4].display();
-    buttonArray[4].clicked();
+      buttonArray[1].display();
+      buttonArray[1].clicked();
+      buttonArray[2].display();
+      buttonArray[2].clicked();
+      buttonArray[3].display();
+      buttonArray[3].clicked();
+      buttonArray[4].display();
+      buttonArray[4].clicked();
   
   
   if (clicked=="store") {
       
+    if(skins) {
+      background(255,255,200);
+      fill(255,0,0);
+      textSize(64);
+      text("RED",width/2-100,height/2+100);
+      fill(0,255,0);
+      text("GREEN",width/2-135,height/2+250);
+      fill(0,0,255);
+      text("BLUE",width/2-110,height/2+400);
+      textSize(32);
+      fill(0);
+      text(round(skinRFake/2.55)+"%",width/2-75,height/2+50);
+      text(round(skinGFake/2.55)+"%",width/2-75,height/2+200);
+      text(round(skinBFake/2.55)+"%",width/2-75,height/2+350);
+      textSize(32);
+      fill(0);
+      text("No Multitasking!", width/2-width/8.7,height/2-height/2.5);
+      textSize(24);
+      text("Coins:"+coin,width-120,height/2-height/2.5);
       
+      fill(skinRFake,skinGFake,skinBFake);
+      rect(width/2-size*3,height/2-height/3,size*4,size*4,10);
+  
+      fill(0);
+      ellipse(width/2-size/8,height/2-size*6,size*1.5,size*1.5);
+      ellipse(width/2-size*2,height/2-size*6,size*1.5,size*1.5);
+  
+      fill(255,0,0);
+      triangle(width/2-size*2,height/2-size*5,width/2-size*1.0625,height/2-(size*4)/1.1,width/2-size/8,height/2-size*5); 
+      
+      fill(0);
+      rect(width/2+70,height/2+50,10,50);
+      rect(width/2+50,height/2+70,50,10);
+      
+      rect(width/2-170,height/2+70,50,10);
+      
+      
+      rect(width/2+100,height/2+200,10,50);
+      rect(width/2+80,height/2+220,50,10);
+      
+      rect(width/2-200,height/2+220,50,10);
+      
+      
+      rect(width/2+80,height/2+350,10,50);
+      rect(width/2+60,height/2+370,50,10);
+      
+      rect(width/2-180,height/2+370,50,10);
+      
+      if(mousePressed && mouseX>width/2+50 && mouseX<width/2+120 && mouseY>height/2+50 && mouseY<height/2+120 && skinRFake<256) {
+        skinRFake=skinRFake+1; 
+      }
+      if(mousePressed && mouseX>width/2-170 && mouseX<width/2-120 && mouseY>height/2+70 && mouseY<height/2+80 && skinRFake>-1) {
+        skinRFake=skinRFake-1; 
+      }
+      
+      if(mousePressed && mouseX>width/2+80 && mouseX<width/2+150 && mouseY>height/2+200 && mouseY<height/2+270 && skinGFake<256) {
+        skinGFake=skinGFake+1; 
+      }
+      if(mousePressed && mouseX>width/2-200 && mouseX<width/2-150 && mouseY>height/2+220 && mouseY<height/2+270 && skinGFake>-1) {
+        skinGFake=skinGFake-1; 
+      }
+      
+      if(mousePressed && mouseX>width/2+60 && mouseX<width/2+130 && mouseY>height/2+350 && mouseY<height/2+420 && skinBFake<256) {
+        skinBFake=skinBFake+1; 
+      }
+      if(mousePressed && mouseX>width/2-180 && mouseX<width/2-130 && mouseY>height/2+370 && mouseY<height/2+380 && skinBFake>-1) {
+        skinBFake=skinBFake-1; 
+      }
+      
+      fill(sfill7);
+      rect(5,height-70,110,50,20);
+      
+      fill(sfill8);
+      rect(width/2-130,height/2-size/4-40,175,60,20);
+      
+      fill(150);
+      textSize(32);
+      text("Buy, $50",width/2-110,height/2-size/4);
+      text("Back",20,height-30);
+      
+      if(mouseX>5 && mouseX<115 && mouseY>height-70 && mouseY<height-10) {
+        sfill7=100;
+        if(mousePressed==true) {
+          skins=false;
+        }
+      }
+      else {
+        sfill7=0; 
+      }
+      
+      if(mouseX>width/2-130 && mouseX<width/2+45 && mouseY>height/2-size/4-40 && mouseY<height/2+10) {
+        sfill8=100;
+        if(mousePressed==true && coin>49 && clickHelp==false) {
+          clickHelp=true;
+          coin=coin-50;
+          skinR=skinRFake;
+          skinG=skinGFake;
+          skinB=skinBFake;
+        }
+      }
+      else {
+        clickHelp=false;
+        sfill8=0; 
+      }
+      
+      
+    }
+    else {
+    
       menuScreen=false;
       int dx = width/2-70; //dx = drawing x
       int dy = height/2; //dy = drawing y
@@ -171,13 +290,19 @@ void draw() {
       text("Speedboost $20",dx-70,dy+size+30);
       text("More Flight Power $25",dx-100,dy-size*4-20);
       text("More Coins $30",dx-70,dy+size+30+size*4);
-      text("Fireball Sheild $100",dx-90,dy+size+30+size*7);
+      text("Fireball Shield $100",dx-90,dy+size+30+size*7);
       
       fill(sfill);
       rect(10,10,80,40,20);            
       textSize(24);
       fill(150);
       text("Menu",20,40);
+      
+      fill(sfill6);
+      rect(width-90,height-50,80,40,20);
+      fill(150);
+      text("Skins",width-80,height-25);
+      
       if(mouseX>10 && mouseX<80 && mouseY>10 && mouseY<40) {
         sfill=100;
         if(mousePressed==true) {
@@ -188,6 +313,20 @@ void draw() {
       }
       else {
         sfill=0; 
+      }
+      
+      
+      if(mouseX<width-10 && mouseX>width-80 && mouseY<height-10 && mouseY>height-40) {
+        sfill6=100;
+        if(mousePressed==true) {
+          skinRFake=skinR;
+          skinGFake=skinG;
+          skinBFake=skinB;
+          skins=true;
+        }
+      }
+      else {
+        sfill6=0; 
       }
 
       fill(sfill2a,sfill2b,sfill2c);
@@ -399,13 +538,48 @@ void draw() {
       fill(255,100,25);
       ellipse(dx+size*1.2,dy+size/2+size*6,20,20);
   }
-  
+  }
   
   
   if(clicked=="play" || clicked=="multiplayer") {
     
+  //player.play();  
   menuScreen=false;
-  ss=round(0.5*level);
+  
+  switch(level) {
+    case 1:
+      ss=1;
+      break;
+    case 2:
+      ss=1.2;
+      break;
+    case 3:
+      ss=1.4;
+      break;
+    case 4:
+      ss=1.5;
+      break;
+    case 5:
+      ss=2;
+      break;
+    case 6:
+      ss=2.4;
+      break;
+    case 7:
+      ss=2.7;
+      break;
+    case 8:
+      ss=3;
+      break;
+    case 9:
+      ss=3.3;
+      break;
+    case 10:
+      ss=0;
+      break;
+  }
+  
+  
   pcFake = pcFake + ss;
   pcReal = pcReal + ss;
   x=x+speedRight-speedLeft-ss;
@@ -421,7 +595,7 @@ void draw() {
     text("Coins:"+coin,width-120,height/2-height/2.5);
   }
   
-  fill(230,100,255);
+  fill(skinR,skinG,skinB);
   rect(x,y,size,size,10);
   
   fill(0);
@@ -807,8 +981,8 @@ void keyPressed() {
 
 
   class spike {
-      int x;
-      int y;
+      float x;
+      float y;
       int oldSize;
       int size;
       
@@ -840,9 +1014,9 @@ void keyPressed() {
       }
     }
     
-    void collision(int cx,int cy) {
+    void collision(float cx,float cy) {
       float dist = dist(cx+42/2,cy+42/2,x,y);
-      if(dist<=size+42/2) { //42 is the size of the player
+      if(dist<=size+42/5) { //42 is the size of the player
         dead = true;
       }
     }
@@ -876,13 +1050,13 @@ void keyPressed() {
   
   
 class fireball {
-  int fx;
-  int fy;
+  float fx;
+  float fy;
   float fxs; //fxs = fireball X Speed
   float fys; //fxy = fireball Y Speed
   int fsize;
-  int px;
-  int py;
+  float px;
+  float py;
   boolean fireballHelp = false;
   
   fireball() {
@@ -959,7 +1133,7 @@ class fireball {
       }
     }
 
-    void collision(int cx,int cy) {
+    void collision(float cx,float cy) {
       float dist = dist(cx+size/2,cy+size/2,fx,fy);
       if(dist<=fsize+42/2) {
         if(fireballSheild==false) {
@@ -1020,8 +1194,8 @@ class button {
 }
 
 class coin {
-  int x;
-  int y;
+  float x;
+  float y;
   int size;
   coin() {
       
@@ -1045,7 +1219,7 @@ class coin {
       x=0-size*10; 
     }
   }
-  void collision(int playerX,int playerY) {
+  void collision(float playerX,float playerY) {
     float dist = dist(playerX+42/2,playerY+42/2,x,y); //42 is the size of the player
     if(dist<=size+42/2) { 
       coin=coin+1;
@@ -1122,6 +1296,8 @@ class goldenCloud extends cloud {
 }
 
 void restart() {
+  //player.rewind();
+  //player.pause();
   restart=true;
   value = 0;
   speedRight = 0;
@@ -1149,7 +1325,7 @@ void restart() {
   size = 42;
 }
 
-void levelCheck(int pcF) {
+void levelCheck(float pcF) {
   if(pcF>=1000) { 
     pcFake=0;
     level=level+1;
