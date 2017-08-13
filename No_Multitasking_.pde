@@ -37,7 +37,7 @@ float pcReal = 0; //pc = pixelCount, used to tell how many pixels the chracter t
 
 //Game vars
 int level = 1; 
-int coin = 100;
+int coin = 0;
 boolean dead = false;
 boolean restart = false;
 boolean clickHelp = false; //limits mousePressed events to one time
