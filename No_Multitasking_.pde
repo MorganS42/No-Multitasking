@@ -37,7 +37,7 @@ float pcReal = 0; //pc = pixelCount, used to tell how many pixels the chracter t
 
 //Game vars
 int level = 1; 
-int coin = 10000;
+int coin = 0;
 boolean dead = false;
 boolean restart = false;
 boolean clickHelp = false; //limits mousePressed events to one time
@@ -105,6 +105,7 @@ coin[] coinArray = new coin[30];
 poisonSpike[] poisonSpikeArray = new poisonSpike[10];
 cloud[] cloudArray = new cloud[10];
 goldenCloud[] goldenCloudArray = new goldenCloud[2];
+bossBattle[] boss = new bossBattle[1]; 
 
 void setup() {
   fullScreen();
@@ -136,6 +137,7 @@ void setup() {
   buttonArray[3] = new button(width/2-210, height/2, 340, 75, width/2-180, "multiplayer");
   buttonArray[4] = new button(width/2-210, height/2+200, 340, 75, width/2-140, "tutorial");
 
+  boss[0] = new bossBattle(width/2, height/2, size*10);
   //,goldenCloudArray[1] = new goldenCloud(width/2,round(random(height/4,height/2)),50);
 
   //minim = new Minim(this);
@@ -612,6 +614,10 @@ void draw() {
       break;
     case 10:
       ss=0;
+      spikeTime=0;
+      spikePower=0;
+      boss[0].display();
+      boss[0].move();
       break;
     }
     if (level>10) {
@@ -1361,5 +1367,35 @@ void levelCheck(float pcF) {
     pcFake=0;
     level=level+1;
     coin=coin+level;
+  }
+}
+
+class bossBattle {
+  int bbsize=size*10;
+  int bbx=width+bbsize;
+  int bby=height/2;
+  bossBattle() {
+  }
+  bossBattle(int bossX, int bossY, int bossS) {
+    bbx=bossX;
+    bby=bossY;
+    bbsize=bossS;
+  }
+  void display() {
+    fill(255, 255, 0);
+    rect(bbx, bby, bbsize, bbsize, 10);
+
+    fill(0);
+    ellipse(bbx+bbsize/4, bby+bbsize/4, bbsize/3.5, bbsize/3.5);
+    ellipse(bbx+(bbsize/4)*3, bby+bbsize/4, bbsize/3.5, bbsize/3.5);
+  
+    fill(255, 0, 0);
+    triangle(bbx+bbsize/4, bby+bbsize/2, bbx+bbsize/2, bby+bbsize/1.1, bbx+(bbsize/4)*3, bby+bbsize/2); 
+  }
+  void move() {
+    bbx+=x-bbx;
+  }
+  void collision() {
+
   }
 }
