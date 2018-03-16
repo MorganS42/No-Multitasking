@@ -18,6 +18,7 @@ int speedY = 0; //Gravitional force
 float flightPower = 100; //Jet pack fuel
 boolean noSpikes=false;
 float spikeTime;
+boolean ts = false;
 
 // 2nd character initial vars 
 float x2;
@@ -90,9 +91,8 @@ int sfill8 = 0; //for the buy button for the skin
 
 //tutorial vars
 int tf = 0; //tf = tutorial fill menu button color
-int stage = 1; //The 
+int stage = 0; //The stage of the tutorial
 
-//boolean spikeSheild = false; in development
 boolean menuScreen = true;
 boolean th = false; //th = tutorial help
 String clicked; //Passes the name of the button clicked to menuClicked function
@@ -105,6 +105,10 @@ coin[] coinArray = new coin[30];
 poisonSpike[] poisonSpikeArray = new poisonSpike[10];
 cloud[] cloudArray = new cloud[10];
 goldenCloud[] goldenCloudArray = new goldenCloud[2];
+
+//Boss Battle vars
+
+boolean rs=false; //rs = remove spikes
 bossBattle[] boss = new bossBattle[1]; 
 
 void setup() {
@@ -137,7 +141,7 @@ void setup() {
   buttonArray[3] = new button(width/2-210, height/2, 340, 75, width/2-180, "multiplayer");
   buttonArray[4] = new button(width/2-210, height/2+200, 340, 75, width/2-140, "tutorial");
 
-  boss[0] = new bossBattle(width/2, height/2, size*10);
+  boss[0] = new bossBattle(width/2, 0, size*5);
   //,goldenCloudArray[1] = new goldenCloud(width/2,round(random(height/4,height/2)),50);
 
   //minim = new Minim(this);
@@ -580,10 +584,10 @@ void draw() {
 
 
   if (clicked=="play" || clicked=="multiplayer") {
-
+    stage=0;
     //player.play();  
     menuScreen=false;
-
+    background(80, 80, 255);
     switch(level) {
     case 1:
       ss=1;
@@ -611,6 +615,7 @@ void draw() {
       break;
     case 9:
       ss=3.3;
+      rs=true;
       break;
     case 10:
       ss=0;
@@ -618,6 +623,7 @@ void draw() {
       spikePower=0;
       boss[0].display();
       boss[0].move();
+      boss[0].collision(x,y,speedLeft,speedRight, speedY, size);
       break;
     }
     if (level>10) {
@@ -629,7 +635,7 @@ void draw() {
     pcReal = pcReal + ss;
     x=x+speedRight-speedLeft-ss;
     y=y+speedY;
-    background(80, 80, 255);
+    //background(80, 80, 255); is up above the level switch because of the boss.
     textSize(32);
     fill(0);
     text("No Multitasking!", width/2-width/8.7, height/2-height/2.5);
@@ -639,7 +645,12 @@ void draw() {
       text("Flight Power:"+round(flightPower), width-200, height/2-height/2.33);
       text("Coins:"+coin, width-120, height/2-height/2.5);
     }
-
+    
+    if(ts) {
+      fill(0);
+      rect(x-size/3.8,y-size/4,size/3.8+size+size/3.8,size/4,15);
+      rect(x+size/6,y-size*1.5,size-size/6-size/6,size*1.5,8);
+    }
     fill(skinR, skinG, skinB);
     rect(x, y, size, size, 10);
 
@@ -681,16 +692,18 @@ void draw() {
         }
       }
 
-      if (y2<=y && y2>=y-size && x2>x-size && x2<x+size) {
+      if (y2<=y-size/2 && y2>=y-size*2 && x2>x-size-speedLeft && x2<x+size+speedRight && (!(key==' '))) {
         speedY2=0;
-        y2=y2-1;
-        x2=x2+speedRight-speedLeft;
+        y2=y-size;
+        x2=x;
       }
-      if (y<=y2 && y>=y2-size && x>x2-size && x<x2+size) {
+      if (y<=y2-size/2 && y>=y2-size*2 && x>x2-size-speedLeft2 && x<x2+size+speedRight2 && (!(key==' '))) {
         speedY=0;
-        y=y-1;
-        x=x+speedRight2-speedLeft2;
+        y=y2-size2;
+        x=x2;
       }
+      
+      
 
       if (speedRight2>0) {
         speedRight2 = speedRight2 -1;
@@ -699,8 +712,9 @@ void draw() {
         speedLeft2 = speedLeft2 -1;
       }
 
-      if (y2<0-size2/2 || x2<0-size2) {
-        dead=true;
+      if (x2<0) {
+        x2++;
+        speedLeft2=0;
       }
 
       if (x2>width-size2/2) {
@@ -840,8 +854,9 @@ void draw() {
       speedLeft = speedLeft -1;
     }
 
-    if (y<0-size/2 || x<0-size) {
-      dead=true;
+    if (x<0) {
+      x++;
+      speedLeft=0;
     }
 
     if (x>width-size/2) {
@@ -886,8 +901,7 @@ void draw() {
     }
   }
   if (clicked=="tutorial") {
-    ss=0;
-
+    
     if (y<height/2+height/3-size) {
       speedY = speedY+1;
     } else {
@@ -904,13 +918,31 @@ void draw() {
     x=x+speedRight-speedLeft-ss;
     y=y+speedY;
 
+    
+    
     background(80, 80, 255);
     textSize(32);
     fill(0);
     text("No Multitasking!", width/2-width/8.7, height/2-height/2.5);
     switch(stage) {
+    case 0:
+      ss=0;
+      if(ts) {
+        text("Hey!!! You've already got the tutorial skin!", width/2-200, height/2);
+      }
+      else {
+        stage++;
+        x=width/2;
+        y=height/2;
+      }
+      break;
     case 1:
       text("Just get used to the controls! Press space when you're done with that.", 170, height/2);
+      if(keyPressed && key==' ') {
+        stage++;
+        x=width/2;
+        y=height/2;
+      }
       break;
 
     case 2:
@@ -918,7 +950,442 @@ void draw() {
       spikeArray[1].display();
       spikeArray[1].move();
       spikeArray[1].collision(x, y);
+      if(x>width) {
+        stage++;
+        x=width/2;
+        y=height/2;
+      }
       break;
+    case 3:
+      text("Now let's add a fireball!!!",width/2-200, height/2);
+      spikeArray[1].display();
+      spikeArray[1].move();
+      spikeArray[1].collision(x, y);
+      fireballArray[1].display();
+      fireballArray[1].move();
+      fireballArray[1].collision(x, y);
+      if(x>width) {
+        stage++;
+        x=width/2;
+        y=height/2;
+      }
+      break;
+      
+      case 4:
+        text("Let's spice it up a bit and get things moving!",width/2-350, height/2);
+        ss=1;
+        level=1;
+        for (int i = 0; i < 30; i++) {
+          spikeArray[i].display();
+          spikeArray[i].move();
+          spikeArray[i].collision(x, y);
+        }
+        for (int i = 0; i < 100; i++) {
+          fireballArray[i].display();
+          fireballArray[i].move();
+          fireballArray[i].collision(x, y);
+        }
+        for (int i = 0; i < 10; i++) {
+          poisonSpikeArray[i].display();
+          poisonSpikeArray[i].move();
+          poisonSpikeArray[i].collision(x, y);
+        }
+        if(x>width) {
+          stage++;
+          x=width/2;
+          y=height/2;
+        }
+        if(x<0) {
+          dead=true;
+        }
+        break;
+     case 5:
+       text("Good job now you're a pro at this! Now go and play the game for real!",width/2-600,height/2);
+       ss=0;
+       if(x>width) {
+          stage++;
+          x=width/2;
+          y=height/2;
+        }
+       break;
+     case 6:
+       text("you can go now...",width/2-100,height/2);
+       ss=0;
+       if(x>width) {
+          stage++;
+          x=width/2;
+          y=height/2;
+        }
+       break;
+     case 7:
+       text("Just leave!",width/2-100,height/2);
+       ss=0;
+       if(x>width) {
+          stage++;
+          x=width/2;
+          y=height/2;
+        }
+       break;
+    case 8:
+       text("You really can just go",width/2-200,height/2);
+       ss=0;
+       if(x>width) {
+          stage++;
+          x=width/2;
+          y=height/2;
+        }
+       break;
+     case 9:
+       text("The menu button is right up there...",width/2-300,height/2);
+       ss=0;
+       if(x>width) {
+          stage++;
+          x=width/2;
+          y=height/2;
+        }
+       break;
+     case 10:
+       text("I promise there's nothing special over there",width/2-350,height/2);
+       ss=0;
+       if(x>width) {
+          stage++;
+          x=width/2;
+          y=height/2;
+        }
+       break;
+     case 11:
+       text("See! There's nothing here!",width/2-200,height/2);
+       ss=0;
+       if(x>width) {
+          stage++;
+          x=width/2;
+          y=height/2;
+        }
+       break;
+     case 12:
+       text("Just stop!!!",width/2-100,height/2);
+       ss=0;
+       if(x>width) {
+          stage++;
+          x=width/2;
+          y=height/2;
+        }
+       break;
+     case 13:
+       text("Please",width/2-100,height/2);
+       ss=0;
+       if(x>width) {
+          stage++;
+          x=width/2;
+          y=height/2;
+        }
+       break;
+     case 14:
+       text("Fine!",width/2-100,height/2);
+       ss=0;
+       if(x>width) {
+          stage++;
+          x=width/2;
+          y=height/2;
+        }
+       break;
+     case 15:
+       text("Now try to get past",width/2-100,height/2);
+       ss=5;
+       if(x>width) {
+          stage++;
+          x=width/2;
+          y=height/2;
+        }
+       break;
+      case 16:
+       text("How did you do that???",width/2-100,height/2);
+       ss=0;
+       if(x>width) {
+          stage++;
+          x=width/2;
+          y=height/2;
+        }
+       break;
+      case 17:
+       text("I'm just leaving",width/2-100,height/2);
+       ss=0;
+       if(x>width) {
+          stage++;
+          x=width/2;
+          y=height/2;
+        }
+       break;
+     case 18:
+       text("Bye",width/2-100,height/2);
+       ss=0;
+       if(x>width) {
+          stage++;
+          x=width/2;
+          y=height/2;
+        }
+       break;
+     case 19:
+       text("Bye",width/2-100,height/2);
+       ss=0;
+       if(x>width) {
+          stage++;
+          x=width/2;
+          y=height/2;
+        }
+       break;
+     case 20:
+       text("Bye",width/2-100,height/2);
+       ss=0;
+       if(x>width) {
+          stage++;
+          x=width/2;
+          y=height/2;
+        }
+       break;
+     case 21:
+       text("Bye",width/2-100,height/2);
+       ss=0;
+       if(x>width) {
+          stage++;
+          x=width/2;
+          y=height/2;
+        }
+       break;
+     case 22:
+       text("Bye",width/2-100,height/2);
+       ss=0;
+       if(x>width) {
+          stage++;
+          x=width/2;
+          y=height/2;
+        }
+       break;
+     case 23:
+       text("Bye",width/2-100,height/2);
+       ss=0;
+       if(x>width) {
+          stage++;
+          x=width/2;
+          y=height/2;
+        }
+       break;
+     case 24:
+       text("Bye",width/2-100,height/2);
+       ss=0;
+       if(x>width) {
+          stage++;
+          x=width/2;
+          y=height/2;
+        }
+       break;
+     case 25:
+       text("Bye",width/2-100,height/2);
+       ss=0;
+       if(x>width) {
+          stage++;
+          x=width/2;
+          y=height/2;
+        }
+       break;
+     case 26:
+       text("Wow! You are stubborn!",width/2-200,height/2);
+       ss=0;
+       if(x>width) {
+          stage++;
+          x=width/2;
+          y=height/2;
+        }
+       break;
+     case 27:
+       text("Really?!?!",width/2-100,height/2);
+       ss=0;
+       if(x>width) {
+          stage++;
+          x=width/2;
+          y=height/2;
+        }
+       break;
+     case 28:
+       text("Just stop.",width/2-100,height/2);
+       ss=0;
+       if(x>width) {
+          stage++;
+          x=width/2;
+          y=height/2;
+        }
+       break;
+     case 29:
+       text("Now i'm mad!",width/2-100,height/2);
+       ss=4;
+       level=10;
+       for (int i = 0; i < 100; i++) {
+          fireballArray[i].display();
+          fireballArray[i].move();
+          fireballArray[i].collision(x, y);
+       }
+       if(x>width) {
+          stage++;
+          x=width/2;
+          y=height/2;
+        }
+       break;
+     case 30:
+       text("Super hard mode!",width/2-150,height/2);
+       ss=2;
+       level=20;
+       for (int i = 0; i < 100; i++) {
+          fireballArray[i].display();
+          fireballArray[i].move();
+          fireballArray[i].collision(x, y);
+       }
+       for (int i = 0; i < 30; i++) {
+          spikeArray[i].display();
+          spikeArray[i].move();
+          spikeArray[i].collision(x, y);
+        }
+       if(x>width) {
+          stage++;
+          x=width/2;
+          y=height/2;
+        }
+       break;
+       case 31:
+       text("I'm actually impressed!",width/2-200,height/2);
+       ss=0;
+       level=0;
+       if(x>width) {
+          stage++;
+          x=width/2;
+          y=height/2;
+        }
+       break;
+       case 32:
+       text("What are you doing this for?",width/2-200,height/2);
+       ss=0;
+       level=0;
+       if(x>width) {
+          stage++;
+          x=width/2;
+          y=height/2;
+        }
+       break;
+       case 33:
+       text("Now you can't fly!!!",width/2-200,height/2);
+       y=height/2+height/3.5;
+       ss=0;
+       level=0;
+       if(x>width) {
+          stage++;
+          x=width/2;
+          y=height/2;
+        }
+       break;
+       case 34:
+       text("Fireballs!",width/2-100,height/2);
+       y=height/2+height/3.5;
+       ss=1;
+       level=4;
+       for (int i = 0; i < 100; i++) {
+          fireballArray[i].display();
+          fireballArray[i].move();
+          fireballArray[i].collision(x, y);
+       }
+       if(x>width) {
+          stage++;
+          x=width/2;
+          y=height/2;
+       }
+       break;
+       case 35:
+       text("Try to jump over a simple spike!",width/2-350,height/2);
+       y=height/2+height/3.5;
+       ss=0;
+       level=0;
+       spikeArray[1].display();
+       spikeArray[1].move();
+       spikeArray[1].collision(x, y);
+       if(x>width) {
+          stage++;
+          x=width/2;
+          y=height/2;
+        }
+       break;
+       case 36:
+       text("I new it!!! You are cheating!",width/2-350,height/2);
+       y=height/2+height/3.5;
+       ss=0;
+       level=0;
+       if(x>width) {
+          stage++;
+          x=width/2;
+          y=height/2;
+        }
+       break;
+       case 37:
+       text("You don't need this tutorial! You already have spike powers!",width/2-450,height/2);
+       y=height/2+height/3.5;
+       ss=0;
+       level=0;
+       if(x>width) {
+          stage++;
+          x=width/2;
+          y=height/2;
+        }
+       break;
+       case 38:
+       text("You also probably have a fireball sheild too!",width/2-300,height/2);
+       y=height/2+height/3.5;
+       ss=0;
+       level=0;
+       if(x>width) {
+          stage++;
+          x=width/2;
+          y=height/2;
+        }
+       break;
+       case 39:
+       text("The end of this dialog is soon...",width/2-300,height/2);
+       y=height/2+height/3.5;
+       ss=0;
+       level=0;
+       if(x>width) {
+          stage++;
+          x=width/2;
+          y=height/2;
+        }
+       break;
+       case 40:
+       text("I would try to stop you from getting to the end but you'll probably just cheat agian.",width/2-600,height/2);
+       y=height/2+height/3.5;
+       ss=0;
+       level=0;
+       if(x>width) {
+          stage++;
+          x=width/2;
+          y=height/2;
+        }
+       break;
+       case 41:
+       text("Thanks for being so determined to get this far. This is all you get! Nothing!",width/2-500,height/2);
+       ss=0;
+       level=0;
+       if(y<0) {
+          stage++;
+          x=width/2;
+          y=height/2;
+        }
+       break;
+       case 42:
+       text("You're smart, so you get the tutorial skin!",width/2-300,height/2);
+       ts=true;
+       break;
+    }
+    
+    if(ts) {
+      fill(0);
+      rect(x-size/3.8,y-size/4,size/3.8+size+size/3.8,size/4,15);
+      rect(x+size/6,y-size*1.5,size-size/6-size/6,size*1.5,8);
     }
 
     fill(230, 100, 255);
@@ -947,6 +1414,8 @@ void draw() {
         menuScreen=true;
         x=width/2;
         y=height/2;
+        restart();
+        stage=0;
       }
     } else {
       tf=0;
@@ -1032,25 +1501,41 @@ class spike {
     size=oldSize+level;
     fill(100);
     triangle(x, y, x+size/2, y-size, x+size, y);
-    if(spikeTime>0) {
+    if(stage==0) {
+      if(spikeTime>0) {
+        fill(0);
+        rect(width/2-spikeTime/2,10,spikeTime,50);
+      }
       fill(0);
-      rect(width/2-spikeTime/2,10,spikeTime,50);
+      text("Spike Powers:" + spikePower, 20, 30);
     }
-    fill(0);
-    text("Spike Powers:" + spikePower, 20, 30);
   }
   public void move() {
     x = x-ss;   
-    if (x<0) {
-      if (round(random(1, 4200/level)) == 1) {
-        x=width;
+    if (x<0 && !(stage==35)) {
+      if(level==0) {
+        //???  
+      }
+      else {
+        if (round(random(1, 4200/level)) == 1 && (!(level==10))) {
+          x=width;
+        }
+      }
+    }
+    if(rs==true) {
+      x=-size*10;
+      if(level==10) {
+        rs=false;  
       }
     }
     if (restart==true) {
       x=0-size*10;
     }
-    if (clicked=="tutorial") {
-      x=width/2+size*4;
+    if (stage==2 || stage==3 || stage==35) {
+      x=width/2+300;
+    }
+    if(stage==34) {
+      spikeTime=0;  
     }
     if(key=='1' && keyPressed && spikePower>0 && noSpikes==false) {
       spikePower--;
@@ -1150,9 +1635,17 @@ class fireball {
       }
       if (fy>(height/2+height/3)) {
         if (fy>=(height+fsize)) {
-          if (round(random(1, 30000/level))==1) {
+          if(!(stage==3)) {
+            if (round(random(1, 30000/level))==1 && !(level==10)) {
+              fy=0;
+              fx=round(random(1, width));
+            }
+          }
+          else {
             fy=0;
             fx=round(random(1, width));
+            fxs=0;
+            fys=0;
           }
         } else {
           fy=height+fsize+1;
@@ -1273,6 +1766,7 @@ class cloud {
   int speed;
   int random;
   int times = 2;
+  float col = random(100,255);
   cloud() {
   }
   cloud(int cloudx, int cloudy, int csize) {
@@ -1283,15 +1777,22 @@ class cloud {
     random=1;
   }
   void display() {
-    for (int i=0; i<size/2; i++) {
-      fill(255);
-      stroke(255);
-      ellipse(cx+i*(size/4), cy, size, size);
-      stroke(0);
+    fill(255);
+    stroke(255);
+    if(level==10) {     
+      fill(col,0,0);
+      stroke(col,0,0);
     }
+    for (int i=0; i<size/2; i++) {
+      ellipse(cx+i*(size/4), cy, size, size);
+    }
+    stroke(0);
   }
   void move() {
     cx=cx-round(ss-random(speed/2, speed*1.5));
+    if(level==10 && speed==0 || speed==-0) {
+      speed=1;    
+    }
     if (cx<0-size*times) {
       if (round(random(1, random))==1) {
         cx=width;
@@ -1360,6 +1861,10 @@ void restart() {
   x = width/2;
   y = height/2;
   size = 42;
+  
+  stage=0;
+  
+  rs=false;
 }
 
 void levelCheck(float pcF) {
@@ -1371,9 +1876,16 @@ void levelCheck(float pcF) {
 }
 
 class bossBattle {
-  int bbsize=size*10;
-  int bbx=width+bbsize;
-  int bby=height/2;
+  int bbsize;
+  int bbx;
+  int bby;
+  int bySpeed;
+  int jumpTime=0;
+  float bxSpeed;
+  int bxms=4;
+  float health=100;
+  boolean stage1 = true;
+  boolean jump = false;
   bossBattle() {
   }
   bossBattle(int bossX, int bossY, int bossS) {
@@ -1382,7 +1894,9 @@ class bossBattle {
     bbsize=bossS;
   }
   void display() {
-    fill(255, 255, 0);
+    //print("hi");
+    strokeWeight(3.8);
+    fill(230, 100 , 255);
     rect(bbx, bby, bbsize, bbsize, 10);
 
     fill(0);
@@ -1390,12 +1904,87 @@ class bossBattle {
     ellipse(bbx+(bbsize/4)*3, bby+bbsize/4, bbsize/3.5, bbsize/3.5);
   
     fill(255, 0, 0);
-    triangle(bbx+bbsize/4, bby+bbsize/2, bbx+bbsize/2, bby+bbsize/1.1, bbx+(bbsize/4)*3, bby+bbsize/2); 
+    triangle(bbx+bbsize/4, bby+bbsize/1.1, bbx+bbsize/2, bby+bbsize/2, bbx+(bbsize/4)*3, bby+bbsize/1.1);
+    
+    fill( ((100-health)/100)*255 , health/100*255 , 0);
+    rect(bbx+(bbx-health/100*(bbsize-bbsize/5))/2-(bbsize/10*7)/2,bby-bbsize/6.5,health/100*(bbsize-bbsize/5),10);
+    
+    strokeWeight(1);
+    
+    
   }
   void move() {
-    bbx+=x-bbx;
+    bby+=bySpeed;
+    bbx+=round(bxSpeed);
+    if(bby<height/2+height/3-bbsize) {
+      bySpeed++;  
+    }
+    else {
+      bySpeed=0;
+      bby=height/2+height/3-bbsize;                                                                                                                                                                                             
+    }
+    
+    if(health<0) {
+      level++;  
+    }
+    
+    //ai:
+    jumpTime++;
+    if(jumpTime>500) {
+      jumpTime=-200;
+      jump=true;  
+    }
+    
+    if(jump) {
+      jump=false;
+      bySpeed=-100;
+    }
+       
+    if(bby+size<0) {
+      fill(0);
+      ellipse(bbx+bbsize/2,80,(-bby)/50,(-bby)/50);
+      if (bbx<x) {
+        float c=x-bbx;
+        if (bxSpeed<c/20) {
+          bxSpeed=bxSpeed+c/100;
+        } else {
+          bxSpeed=bxSpeed-c/100;
+        }
+      } else {
+        float d=bbx-x;
+        if (bxSpeed<d/20) {
+          bxSpeed=bxSpeed-d/100;
+        } else {
+          bxSpeed=bxSpeed-d/100;
+        }
+      }
+    }
+    
+    if(bby+bbsize>0 && bySpeed>20) {
+      bySpeed=20;
+      bxSpeed/=1.1;
+    }
   }
-  void collision() {
-
+  void collision(float px,float py, float psl, float psr , float psy, float psize) {
+    if(px+psize>bbx && px<bbx+bbsize && py+psize>bby && py<bby+bbsize) {
+      if(py>bby+(bbsize/2) && px>bbx+psize/2 && px<bbx-psize/2) {
+        dead=true;      
+      }
+      else {
+        if(psr>psl) {
+          health-=psr/4+psy/5;
+          speedLeft=round(speedRight*1.5);
+        }
+        else {
+          health-=psl/4+psy/5;
+          speedRight=round(speedLeft*1.5);
+        }
+        
+        speedY=-round(speedY/1.5);
+        y+=speedY;
+        y--;
+                
+      }
+    }
   }
 }
